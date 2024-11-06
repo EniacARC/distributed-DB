@@ -8,28 +8,35 @@ class DataBase(Database):
     def __init__(self, filepath: str) -> None:
         super().__init__()
         self.filepath = filepath
+        self.change = True
         if re.search(r"^\w+\.pickle", filepath) is None:
             raise Exception("db file is not valid!")
 
-    def load_dict(self) -> None:
-        with open(self.__filepath, "rb") as f:
-            self.db = pickle.load(f)
+    # file logic
+    def __load_dict(self) -> None:
+        if self.change:
+            with open(self.__filepath, "rb") as f:
+                self.db = pickle.load(f)
+            self.change = False
 
-    def write_to_file(self):
+    def __write_to_file(self):
         with open(self.__filepath, "wb") as f:
             pickle.dump(self.db, f)
+        self.change = True
 
-    def set_value(self, key: str, val: object) -> bool:
-        self.load_dict()
-        r_val = super().set_value(key, val)
-        self.write_to_file()
-        return r_val
-
+    # need read perms
     def get_value(self, key: str) -> object:
-        self.load_dict()
+        self.__load_dict()
         return super().get_value(key)
 
+    # need write permissions
+    def set_value(self, key: str, val: object) -> bool:
+        self.__load_dict()
+        r_val = super().set_value(key, val)
+        self.__write_to_file()
+        return r_val
+
     def delete_value(self, key: str) -> None:
-        self.load_dict()
+        self.__load_dict()
         super().delete_value(key)
-        self.write_to_file()
+        self.__write_to_file()

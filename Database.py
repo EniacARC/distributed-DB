@@ -6,7 +6,7 @@ class Database(ABC):
         # self.__filepath = filepath
         # if re.search(r"^\w+\.pickle", filepath) is None:
         #     raise Exception("db file is not not valid!")
-        self.db = None
+        self.db = {}
 
     # def __do_action(self, func, *args):
     #     with open(self.__filepath, "rb") as f:
