@@ -1,34 +1,44 @@
 from abc import ABC
+from typing import Optional
 
 
 class Database(ABC):
     def __init__(self) -> None:
-        # self.__filepath = filepath
-        # if re.search(r"^\w+\.pickle", filepath) is None:
-        #     raise Exception("db file is not not valid!")
-        self.db = {}
+        """
+        Initializes an empty database dictionary.
+        """
+        self.db: dict[str, object] = {}
 
-    # def __do_action(self, func, *args):
-    #     with open(self.__filepath, "rb") as f:
-    #         func(f, args)
-    #     with open(self.__filepath, "wb") as f:
-    #         pickle.dump()
     def set_value(self, key: str, val: object) -> bool:
+        """
+        Sets a value in the database for the specified key.
+
+        :param key: The key associated with the value.
+        :param val: The value to associate with the key.
+        :return: True if the value was set successfully, otherwise False.
+        """
         if not isinstance(key, str):
             return False
-        # if key in self.db:
         self.db[key] = val
         return True
-        # return False
 
-    def get_value(self, key: str) -> object:
+    def get_value(self, key: str) -> Optional[object]:
+        """
+        Retrieves the value associated with the given key.
+
+        :param key: The key whose associated value is to be retrieved.
+        :return: The value associated with the key or None if the key doesn't exist.
+        """
         if not isinstance(key, str):
-            return False
-        if key in self.db:
-            return self.db[key]
-        return None
+            return None
+        return self.db.get(key)
 
     def delete_value(self, key: str) -> None:
+        """
+        Deletes the value associated with the given key.
+
+        :param key: The key whose associated value is to be deleted.
+        """
         if not isinstance(key, str):
             return
         if key in self.db:
