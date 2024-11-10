@@ -79,4 +79,5 @@ def main():
     os.remove(filepath)
 
 
-test()
+if __name__ == '__main__':
+    main()
