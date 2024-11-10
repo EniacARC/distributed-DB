@@ -2,6 +2,7 @@ from typing import Union
 import threading
 import multiprocessing
 from DatabaseRead import DataBase
+from Logger import Logger  # Import the Logger class
 
 
 class Sync:
@@ -21,6 +22,9 @@ class Sync:
         self.writer = False
         self.db = DataBase(filepath)
 
+        # Log initialization
+        Logger.info(f"Sync initialized for file: {filepath}, read_amount: {read_amount}")
+
     def __get_read(self, func, *args) -> object:
         """
         Handles the read operation with semaphore locking.
@@ -34,10 +38,10 @@ class Sync:
             self.semaphore.acquire()
             r_value = func(*args)
         except Exception as ex:
-            print(ex)
+            Logger.error(f"Read operation failed for key: {args[0]} - {ex}")
         finally:
             self.semaphore.release()
-            return r_value
+        return r_value
 
     def __get_write(self, func, *args) -> bool:
         """
@@ -55,12 +59,12 @@ class Sync:
 
             r_value = func(*args)
         except Exception as ex:
-            print(ex)
+            Logger.error(f"Write operation failed for key: {args[0]} - {ex}")
         finally:
             for _ in range(self.read_amount):
                 self.semaphore.release()
             self.lock_write.release()
-            return r_value
+        return r_value
 
     def get_value(self, key: str) -> object:
         """
@@ -69,7 +73,10 @@ class Sync:
         :param key: The key whose associated value is to be retrieved.
         :return: The value associated with the key.
         """
-        return self.__get_read(self.db.get_value, key)
+        result = self.__get_read(self.db.get_value, key)
+        if result is not None:
+            Logger.info(f"Read value for key: {key} - {result}")
+        return result
 
     def set_value(self, key: str, val: object) -> bool:
         """
@@ -79,12 +86,18 @@ class Sync:
         :param val: The value to associate with the key.
         :return: True if the value was set successfully, False otherwise.
         """
-        return self.__get_write(self.db.set_value, key, val)
+        success = self.__get_write(self.db.set_value, key, val)
+        if success:
+            Logger.info(f"Set value for key: {key} to {val}")
+        return success
 
-    def delete_value(self, key: str) -> bool | None:
+    def delete_value(self, key: str) -> bool:
         """
         Deletes the value associated with the given key.
 
         :param key: The key whose associated value is to be deleted.
         """
-        return self.__get_write(self.db.delete_value, key)
+        success = self.__get_write(self.db.delete_value, key)
+        if success:
+            Logger.info(f"Deleted value for key: {key}")
+        return success

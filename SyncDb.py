@@ -1,6 +1,7 @@
 import threading
 import multiprocessing
 from SynClass import Sync
+from Logger import Logger
 
 
 class SyncDatabase(Sync):
@@ -12,11 +13,18 @@ class SyncDatabase(Sync):
         :param mode: If True, use threading; if False, use multiprocessing.
         :param amount: The number of concurrent readers allowed.
         """
-        if mode:  # threading
+        # Log initialization details
+        if mode:
+            Logger.info(f"Initializing SyncDatabase with threading. Concurrent readers allowed: {amount}")
             semaphore: threading.Semaphore = threading.Semaphore(amount)
             lock: threading.Lock = threading.Lock()
-        else:  # multiprocessing
+        else:
+            Logger.info(f"Initializing SyncDatabase with multiprocessing. Concurrent readers allowed: {amount}")
             semaphore: multiprocessing.Semaphore = multiprocessing.Semaphore(amount)
             lock: multiprocessing.Lock = multiprocessing.Lock()
 
         super().__init__(filepath, semaphore, lock, amount)
+
+        # Log successful initialization
+        Logger.info(f"SyncDatabase initialized for {'threading' if mode else 'multiprocessing'} mode.")
+

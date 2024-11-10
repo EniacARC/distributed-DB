@@ -2,6 +2,7 @@ import os
 import threading
 from DatabaseRead import DataBase
 from SyncDb import SyncDatabase  # Assuming SyncDatabase extends functionality of Sync
+from Logger import Logger
 
 
 # Helper function to print test results
@@ -23,6 +24,7 @@ def write_task(db, key):
 
 
 def main():
+    Logger.setup_logger()
     # Set up a filepath, semaphore, and SyncDatabase instance
     filepath = "test_database.pickle"  # Sample filepath
 

@@ -3,6 +3,7 @@ import re
 import pickle
 from typing import Optional
 from Database import Database
+from Logger import Logger  # Import the Logger class
 
 
 class DataBase(Database):
@@ -23,6 +24,9 @@ class DataBase(Database):
             with open(filepath, 'wb') as f:
                 # Optionally write an initial value or leave it empty
                 pickle.dump(self.db, f)
+            Logger.info(f"Database file created at: {filepath}")
+        else:
+            Logger.info(f"Database initialized from file: {filepath}")
 
     def __load_dict(self) -> None:
         """
@@ -34,6 +38,7 @@ class DataBase(Database):
             with open(self.__filepath, "rb") as f:
                 self.db = pickle.load(f)
             self.change = False
+            Logger.info(f"Database loaded from file: {self.__filepath}")
 
     def __write_to_file(self) -> None:
         """
@@ -44,6 +49,7 @@ class DataBase(Database):
         with open(self.__filepath, "wb") as f:
             pickle.dump(self.db, f)
         self.change = True
+        Logger.info(f"Database written to file: {self.__filepath}")
 
     def get_value(self, key: str) -> Optional[object]:
         """
@@ -53,7 +59,12 @@ class DataBase(Database):
         :return: The value associated with the key or None if the key doesn't exist.
         """
         self.__load_dict()
-        return super().get_value(key)
+        value = super().get_value(key)
+        if value is not None:
+            Logger.info(f"Retrieved value for key: {key} - {value}")
+        else:
+            Logger.warning(f"Key not found for get_value: {key}")
+        return value
 
     def set_value(self, key: str, val: object) -> bool:
         """
@@ -64,9 +75,13 @@ class DataBase(Database):
         :return: True if the value was set successfully, False otherwise.
         """
         self.__load_dict()
-        r_val = super().set_value(key, val)
-        self.__write_to_file()
-        return r_val
+        success = super().set_value(key, val)
+        if success:
+            self.__write_to_file()
+            Logger.info(f"Set value for key: {key} to {val}")
+        else:
+            Logger.warning(f"Failed to set value for key: {key}")
+        return success
 
     def delete_value(self, key: str) -> None:
         """
@@ -77,3 +92,4 @@ class DataBase(Database):
         self.__load_dict()
         super().delete_value(key)
         self.__write_to_file()
+        Logger.info(f"Deleted value for key: {key}")
