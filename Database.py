@@ -14,22 +14,22 @@ class Database(ABC):
     #     with open(self.__filepath, "wb") as f:
     #         pickle.dump()
     def set_value(self, key: str, val: object) -> bool:
-        if type(key) is not type(str):
+        if not isinstance(key, str):
             return False
-        if self.db.contains(key):
-            self.db[key] = val
-            return True
-        return False
+        # if key in self.db:
+        self.db[key] = val
+        return True
+        # return False
 
     def get_value(self, key: str) -> object:
-        if type(key) is not type(str):
+        if not isinstance(key, str):
             return False
-        if self.db.contains(key):
+        if key in self.db:
             return self.db[key]
         return None
 
     def delete_value(self, key: str) -> None:
-        if type(key) is not type(str):
-            raise Exception("key is not valid!")
-        if self.db.contains(key):
+        if not isinstance(key, str):
+            return
+        if key in self.db:
             del self.db[key]

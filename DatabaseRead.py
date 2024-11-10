@@ -1,3 +1,5 @@
+import os
+
 from Database import Database
 import re
 import pickle
@@ -7,10 +9,16 @@ from typing import BinaryIO
 class DataBase(Database):
     def __init__(self, filepath: str) -> None:
         super().__init__()
-        self.filepath = filepath
+        self.__filepath = filepath
         self.change = True
-        if re.search(r"^\w+\.pickle", filepath) is None:
+        if re.search(r"\w+\.pickle$", filepath) is None:
             raise Exception("db file is not valid!")
+
+        if not os.path.exists(filepath):
+            # Create the file if it doesn't exist
+            with open(filepath, 'wb') as f:
+                # Optionally write an initial value or leave it empty
+                pickle.dump(self.db, f)
 
     # file logic
     def __load_dict(self) -> None:

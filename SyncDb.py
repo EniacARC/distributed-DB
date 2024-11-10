@@ -4,12 +4,19 @@ from SynClass import Sync
 
 
 class SyncDatabase(Sync):
-    def __init__(self, filepath, mode, amount):
-        if mode != 0 and mode != 1:
-            raise Exception("invalid mode!")
-        if mode == 0:  # multi threading
-            semaphore = threading.Semaphore(amount)
-        else:
-            semaphore = multiprocessing.Semaphore(amount)
+    def __init__(self, filepath: str, mode: bool, amount: int) -> None:
+        """
+        Initialize SyncDatabase with either threading or multiprocessing.
 
-        super().__init__(filepath, semaphore, amount)
+        :param filepath: Path to the database file.
+        :param mode: If True, use threading; if False, use multiprocessing.
+        :param amount: The number of concurrent readers allowed.
+        """
+        if mode:  # threading
+            semaphore: threading.Semaphore = threading.Semaphore(amount)
+            lock: threading.Lock = threading.Lock()
+        else:  # multiprocessing
+            semaphore: multiprocessing.Semaphore = multiprocessing.Semaphore(amount)
+            lock: multiprocessing.Lock = multiprocessing.Lock()
+
+        super().__init__(filepath, semaphore, lock, amount)
